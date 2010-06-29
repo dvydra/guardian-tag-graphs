@@ -16,13 +16,9 @@ API_URL = "http://content.guardianapis.com/search?tag=%s&from-date=%s&to-date=%s
 
 class DisplayTagDataHander(webapp.RequestHandler):
     def get(self, tag):
-        data = []
-        for start_day, end_day, url in generate_url(tag):
-            logging.info("%s to %s" % (start_day, end_day))
-            data.append(
-                (start_day, end_day, self.save_page(url),)
-            )
-        render(self.response, {'data': data}, 'index.html')
+        tag_history = TagHistory.gql("WHERE name = :tag", tag=tag)
+
+        return render(self.response, {'tag_history': tag_history}, 'index.html')
     
 class RetrieveTagDataHander(webapp.RequestHandler):
     def get(self, tag):
@@ -76,7 +72,7 @@ def main():
     application = webapp.WSGIApplication([
         ('/save/(.*)', RetrieveTagDataHander),
         ('/save-queue', SaveDataHandler),
-        
+        ('/show/(.*)', DisplayTagDataHander),
 
     ],debug=True)
     util.run_wsgi_app(application)

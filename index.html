@@ -3,14 +3,10 @@
 	<title>results</title>
 </head>
 <body>
-{% for item in data %}
-<h1>{{item.0}} to {{item.1}}</h1>
+{% for tag in tag_history %}
+<h1>{{tag.data_date}}</h1>
 <p>
-{% if item.2 %}
-    {{item.2}}
-{% else %}
-    <b>no data for week</b>
-{% endif %}
+    {{tag.related_section}}: {{tag.content_count}}
 </p>
 </hr>
 {% endfor %}
