@@ -9,7 +9,7 @@ import datetime
 import logging
 import os
 
-API_URL = "http://content.guardianapis.com/search?tag=%s&from-date=%s&to-date=%s&format=json&show-tags=all&show-refinements=keyword&refinement-size=50&api-key=%s"
+API_URL = "http://content.guardianapis.com/search?tag=%s&from-date=%s&to-date=%s&format=json&show-tags=all&show-refinements=section&refinement-size=50&api-key=%s"
 
 
 class MainHandler(webapp.RequestHandler):
@@ -28,7 +28,7 @@ class RetrieveTagDataHander(webapp.RequestHandler):
 
     def save_page(self, url):
         logging.info(url)
-        content = simplejson.loads(urlfetch.fetch(url).content)
+        content = simplejson.loads(urlfetch.fetch(url, deadline=10).content)
 
         try:
             r = ""
@@ -40,7 +40,7 @@ class RetrieveTagDataHander(webapp.RequestHandler):
         return r
 
     def generate_url(self, tag):
-        for subtract_days in range(1,2):
+        for subtract_days in range(1,5):
             start_day = (datetime.date.today() - datetime.timedelta(weeks=subtract_days)).strftime("%Y-%m-%d")
             end_day   = (datetime.date.today() - datetime.timedelta(weeks=subtract_days-1, days=1)).strftime("%Y-%m-%d")
             #date_string = day.strftime("%Y-%m-%d")
