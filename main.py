@@ -7,6 +7,7 @@ from google.appengine.ext.webapp import template
 from local_settings import API_KEY
 import datetime
 import logging
+import os
 
 API_URL = "http://content.guardianapis.com/search?tag=%s&from-date=%s&to-date=%s&format=json&show-tags=all&show-refinements=keyword&refinement-size=50&api-key=%s"
 
@@ -17,31 +18,34 @@ class MainHandler(webapp.RequestHandler):
 
 class RetrieveTagDataHander(webapp.RequestHandler):
     def get(self, tag):
-        for date_string, url in self.generate_url(tag):
-            self.save_page(url, date_string)
+        data = []
+        for start_day, end_day, url in self.generate_url(tag):
+            logging.info("%s to %s" % (start_day, end_day))
+            data.append(
+                (start_day, end_day, self.save_page(url),)
+            )
+        render(self.response, {'data': data}, 'index.html')
 
-    def save_page(self, url, date_string):
+    def save_page(self, url):
+        logging.info(url)
         content = simplejson.loads(urlfetch.fetch(url).content)
-        logging.info(date_string)
-        r = "<h1>%s</h1>" % date_string
+
         try:
+            r = ""
             refinements = content['response']['refinementGroups'][0]['refinements']
-            r += "<p>"
             for section in refinements:
                 r += "%s: %d, " % (section['displayName'], section['count'])
-            r += "</p>"
         except KeyError:
             logging.error("no data for %s" % url)
-            r += "<p><b>No data for %s</b></p>" % date_string
-        r += "<hr />"
-        self.response.out.write(r)
+        return r
 
     def generate_url(self, tag):
-        for subtract_days in range(0,30):
-            day = datetime.date.today() - datetime.timedelta(days=subtract_days)
-            date_string = day.strftime("%Y-%m-%d")
-            url = API_URL % (tag, date_string,date_string,API_KEY)
-            yield date_string, url
+        for subtract_days in range(1,2):
+            start_day = (datetime.date.today() - datetime.timedelta(weeks=subtract_days)).strftime("%Y-%m-%d")
+            end_day   = (datetime.date.today() - datetime.timedelta(weeks=subtract_days-1, days=1)).strftime("%Y-%m-%d")
+            #date_string = day.strftime("%Y-%m-%d")
+            url = API_URL % (tag, start_day,end_day,API_KEY)
+            yield start_day, end_day, url
 
 def render(response, context, template_path):
     path = os.path.join(os.path.dirname(__file__), template_path)

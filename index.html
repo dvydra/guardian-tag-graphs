@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>local_settings</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Daniel Vydra">
+	<!-- Date: 2010-06-29 -->
+</head>
+<body>
+{% for item in data %}
+<h1>{{item.0}} to {{item.1}}</h1>
+<p>
+{% if item.2 %}
+    {{item.2}}
+{% else %}
+    <b>no data for week</b>
+{% endif %}
+</p>
+</hr>
+{% endfor %}
+</body>
+</html>
